@@ -75,7 +75,7 @@ export async function processTurn(userInput, isHidden = false) {
 
         if (state.char.hp <= 0 || res.gameOver) { 
             printLog("<h2>☠️ GAME OVER</h2>", 'system-msg damage-text'); 
-            document.getElementById('interaction-area').style.display = 'none'; 
+            document.getElementById('input-area').style.display = 'none';
             return; 
         } 
 
