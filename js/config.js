@@ -30,5 +30,4 @@ export const WORLD_THEMES = [
     "Slice of Life", "Corporate", "Philosophy", "Surreal", "Journalism" 
 ]; 
  
-export const STAT_NAMES = ['STR', 'INT', 'DEX', 'CHA'];  
-export const STAT_DESC = {'STR': 'Fisik', 'INT': 'Akal', 'DEX': 'Kecepatan', 'CHA': 'Sosial'};
+// Dynamic stats - no hardcoded values

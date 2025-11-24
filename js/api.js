@@ -3,7 +3,7 @@ import { model } from './config.js';
 import { printLog, updateStatusUI, setAtmosphere } from './modules/ui.js';
 import { renderInventory, updateCraftUI } from './modules/inventory.js';
 import { setMode } from './screens/game.js';
-import { constructSystemPrompt } from './modules/prompts.js';
+import { constructSystemPrompt, constructCharFormPrompt } from './modules/prompts.js';
 
 export async function processTurn(userInput, isHidden = false) { 
     const storedKey = localStorage.getItem('gemini_api_key');
@@ -45,6 +45,13 @@ export async function processTurn(userInput, isHidden = false) {
             } 
         } 
 
+        // Handle Dynamic Stats
+        if (res.stats_set) {
+            Object.keys(res.stats_set).forEach(key => {
+                state.char.stats[key] = res.stats_set[key];
+            });
+        }
+
         if(res.inventory_add) res.inventory_add.forEach(i => state.inventory.push(i)); 
         if(res.inventory_remove) { 
             res.inventory_remove.forEach(rem => { 
@@ -74,3 +81,28 @@ export async function processTurn(userInput, isHidden = false) {
         updateCraftUI();  
     } 
 } 
+
+export async function generateCharacterForm() {
+    const storedKey = localStorage.getItem('gemini_api_key');
+    if (!storedKey) {
+        alert("API Key required!");
+        window.openSettings();
+        return null;
+    }
+
+    const prompt = constructCharFormPrompt(state.selectedGenres, state.selectedThemes, state.language);
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${storedKey}`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+        });
+
+        const data = await response.json();
+        const jsonText = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(jsonText);
+    } catch (e) {
+        console.error("Form generation failed:", e);
+        return null;
+    }
+}
