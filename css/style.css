@@ -308,6 +308,7 @@ input[type="text"]:focus { border-color: var(--accent); background: rgba(255,255
     backdrop-filter: blur(5px);
     transition: 0.2s;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    white-space: nowrap;
 }
 #btn-settings:hover {
     color: white;
