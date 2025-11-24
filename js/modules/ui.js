@@ -1,15 +1,8 @@
 import { state } from '../state.js';
-import { TRANSLATIONS } from './localization.js';
+import { TRANSLATIONS, getEffectiveLanguage } from './localization.js';
 
 export function applyTranslations() {
-    // Default to 'id' unless language looks like English
-    let uiLang = 'id';
-    const userLang = (state.language || '').toLowerCase();
-
-    if (userLang.includes('english') || userLang.includes('en') || userLang === 'us' || userLang === 'uk') {
-        uiLang = 'en';
-    }
-
+    const uiLang = getEffectiveLanguage(state.language);
     const text = TRANSLATIONS[uiLang];
     if (!text) return;
 
@@ -64,6 +57,7 @@ export function setAtmosphere(type) {
 export function printLog(html, cls) { 
     const div = document.createElement('div'); div.className = cls; div.innerHTML = html; 
     const out = document.getElementById('output'); out.appendChild(div); out.scrollTop = out.scrollHeight; 
+    return div;
 } 
 
 export function updateStatusUI() { 

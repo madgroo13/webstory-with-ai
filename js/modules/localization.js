@@ -30,11 +30,12 @@ export const TRANSLATIONS = {
         'btn-save-api': 'Simpan',
         'link-get-key': 'Dapatkan API Key di sini',
         'btn-back-setup': '← KEMBALI',
-        'loading-form': 'Sedang menyusun formulir karakter...',
+        'loading-form': '⏳ Sedang menyusun formulir karakter...',
         'status-hp': 'HP',
         'inv-empty': 'Kosong',
         'craft-slot-1': 'Pilih Item 1',
-        'craft-slot-2': 'Pilih Item 2'
+        'craft-slot-2': 'Pilih Item 2',
+        'txt-thinking': '⏳ AI sedang berpikir...'
     },
     'en': {
         'btn-inv': '🎒 Bag',
@@ -67,10 +68,19 @@ export const TRANSLATIONS = {
         'btn-save-api': 'Save',
         'link-get-key': 'Get API Key here',
         'btn-back-setup': '← BACK',
-        'loading-form': 'Constructing character form...',
+        'loading-form': '⏳ Constructing character form...',
         'status-hp': 'HP',
         'inv-empty': 'Empty',
         'craft-slot-1': 'Select Item 1',
-        'craft-slot-2': 'Select Item 2'
+        'craft-slot-2': 'Select Item 2',
+        'txt-thinking': '⏳ AI is thinking...'
     }
 };
+
+export function getEffectiveLanguage(input) {
+    const raw = (input || '').toLowerCase();
+    if (raw.includes('english') || raw.includes('en') || raw === 'us' || raw === 'uk') {
+        return 'en';
+    }
+    return 'id';
+}

@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { renderInventory } from '../modules/inventory.js';
 import { updateStatusUI, applyTranslations } from '../modules/ui.js';
-import { TRANSLATIONS } from '../modules/localization.js';
+import { TRANSLATIONS, getEffectiveLanguage } from '../modules/localization.js';
 import { processTurn, generateCharacterForm } from '../api.js';
 
 // Global cache for form data
@@ -13,7 +13,7 @@ export async function initCharacterCreation() {
     document.getElementById('screen-char').style.display = 'flex';
 
     const container = document.getElementById('ai-char-form');
-    const lang = state.language || 'id';
+    const lang = getEffectiveLanguage(state.language);
     container.innerHTML = `<div style="text-align:center; padding:50px; color:#aaa; font-style:italic;">${TRANSLATIONS[lang]['loading-form']}</div>`;
 
     // Hide Start Button
