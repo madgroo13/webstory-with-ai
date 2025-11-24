@@ -15,6 +15,7 @@ export function init() {
         const def = GENRE_DEFINITIONS[key]; 
         const btn = document.createElement('div'); 
         btn.className = 'toggle-btn'; 
+        btn.dataset.key = key;
         btn.innerHTML = `<strong>${key}</strong><small>${def.desc}</small>`; 
         btn.onclick = () => toggleGenre(key, btn); 
         gGrid.appendChild(btn); 
@@ -46,7 +47,32 @@ export function init() {
             modStat(btn.dataset.stat, parseInt(btn.dataset.val));
         });
     });
+
+    updateGenreButtonStates();
 } 
+
+function updateGenreButtonStates() {
+    const disabledGenres = new Set();
+    state.selectedGenres.forEach(selected => {
+        const conflicts = GENRE_DEFINITIONS[selected]?.conflicts || [];
+        conflicts.forEach(c => disabledGenres.add(c));
+    });
+
+    const gGrid = document.getElementById('genre-list');
+    if (!gGrid) return;
+
+    const buttons = gGrid.querySelectorAll('.toggle-btn');
+    buttons.forEach(btn => {
+        const key = btn.dataset.key;
+        if (!key) return;
+
+        if (disabledGenres.has(key) && !state.selectedGenres.includes(key)) {
+            btn.classList.add('disabled');
+        } else {
+            btn.classList.remove('disabled');
+        }
+    });
+}
 
 export function toggleGenre(key, btn) { 
     if(state.selectedGenres.includes(key)) { 
@@ -59,6 +85,7 @@ export function toggleGenre(key, btn) {
         } 
     } 
     updateBackgroundFromSelection(); 
+    updateGenreButtonStates();
     document.getElementById('btn-next').disabled = state.selectedGenres.length === 0; 
 } 
 

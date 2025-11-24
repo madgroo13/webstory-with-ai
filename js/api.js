@@ -3,6 +3,7 @@ import { model } from './config.js';
 import { printLog, updateStatusUI, setAtmosphere } from './modules/ui.js';
 import { renderInventory, updateCraftUI } from './modules/inventory.js';
 import { setMode } from './screens/game.js';
+import { constructSystemPrompt } from './modules/prompts.js';
 
 export async function processTurn(userInput, isHidden = false) { 
     const storedKey = localStorage.getItem('gemini_api_key');
@@ -20,24 +21,7 @@ export async function processTurn(userInput, isHidden = false) {
     const btns = document.querySelectorAll('button'); btns.forEach(b => b.disabled = true); 
 
     try { 
-        const sys = ` 
-        RPG GM. Language: '${state.language}'. 
-        Mechanics: ${state.selectedGenres.join(', ')}.  
-        Setting: ${state.selectedThemes.join(', ')}. 
-        OUTPUT JSON ONLY: 
-        { 
-            "story": "HTML string", 
-            "hp_change": int, 
-            "hp_set": int, 
-            "inventory_add": ["item"], 
-            "inventory_remove": ["item"], 
-            "atmosphere": "neutral/forest/cyberpunk/horror/combat/dungeon",  
-            "summary": "recap", 
-            "mode": "text/choice/dice", 
-            "options": ["opt1"], 
-            "check": {"stat":"STR","dc":10,"reason":""}, 
-            "gameOver": boolean 
-        }`; 
+        const sys = constructSystemPrompt(state);
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${storedKey}`, {
             method: 'POST', headers: {'Content-Type': 'application/json'}, 
