@@ -6,6 +6,11 @@ import { processTurn } from '../api.js';
 let tempPoints = 10;
 let tempStats = {STR:0,INT:0,DEX:0,CHA:0};
 
+export function resetTempStats() {
+    tempPoints = 10;
+    tempStats = {STR:0,INT:0,DEX:0,CHA:0};
+}
+
 export function modStat(stat, val) { 
     if (val > 0 && tempPoints > 0) { tempStats[stat]++; tempPoints--; } 
     else if (val < 0 && tempStats[stat] > 0) { tempStats[stat]--; tempPoints++; } 

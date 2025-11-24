@@ -5,6 +5,10 @@ import { modStat } from './character.js';
 
 let menuStep = 1;
 
+export function resetSetupState() {
+    menuStep = 1;
+}
+
 export function init() { 
     const gGrid = document.getElementById('genre-list'); 
     Object.keys(GENRE_DEFINITIONS).forEach(key => { 
