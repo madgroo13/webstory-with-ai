@@ -1,16 +1,15 @@
 import { state } from '../state.js';
-import { GENRE_DEFINITIONS, WORLD_THEMES, STAT_NAMES, STAT_DESC } from '../config.js';
+import { GENRE_DEFINITIONS, WORLD_THEMES } from '../config.js';
 import { updateBackgroundFromSelection } from '../modules/ui.js';
-import { modStat } from './character.js';
-
-let menuStep = 1;
+import { TRANSLATIONS } from '../modules/localization.js';
 
 export function resetSetupState() {
-    menuStep = 1;
+    // No step logic anymore
 }
 
 export function init() { 
     const gGrid = document.getElementById('genre-list'); 
+    gGrid.innerHTML = '';
     Object.keys(GENRE_DEFINITIONS).forEach(key => { 
         const def = GENRE_DEFINITIONS[key]; 
         const btn = document.createElement('div'); 
@@ -22,6 +21,7 @@ export function init() {
     }); 
 
     const tGrid = document.getElementById('theme-list'); 
+    tGrid.innerHTML = '';
     WORLD_THEMES.forEach(theme => { 
         const btn = document.createElement('div'); 
         btn.className = 'toggle-btn'; 
@@ -30,25 +30,9 @@ export function init() {
         tGrid.appendChild(btn); 
     }); 
 
-    const sList = document.getElementById('stats-inputs'); 
-    STAT_NAMES.forEach(stat => { 
-        const row = document.createElement('div'); 
-        row.className = 'stat-row'; 
-        row.innerHTML = ` 
-            <div><div style="font-weight:bold;">${stat}</div><span style="font-size:0.7em; color:#aaa;">${STAT_DESC[stat]}</span></div> 
-            <div class="stat-controls"><button data-stat="${stat}" data-val="-1">-</button><span class="stat-val" id="val-${stat}">0</span><button data-stat="${stat}" data-val="1">+</button></div> 
-        `; 
-        sList.appendChild(row); 
-    }); 
-
-    // Add listeners for stats manually since we can't use onclick with module exports easily in innerHTML string above
-    sList.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            modStat(btn.dataset.stat, parseInt(btn.dataset.val));
-        });
-    });
-
+    // Remove old stat listeners as we don't have them anymore
     updateGenreButtonStates();
+    updateNextButton();
 } 
 
 function updateGenreButtonStates() {
@@ -74,6 +58,15 @@ function updateGenreButtonStates() {
     });
 }
 
+function updateNextButton() {
+    // Enable if at least 1 genre and 1 theme selected
+    // Or just 1 genre? User requirements implies both.
+    // "Pilih Genre & Tema dalam satu layar"
+    const hasGenre = state.selectedGenres.length > 0;
+    const hasTheme = state.selectedThemes.length > 0;
+    document.getElementById('btn-next').disabled = !(hasGenre && hasTheme);
+}
+
 export function toggleGenre(key, btn) { 
     if(state.selectedGenres.includes(key)) { 
         state.selectedGenres = state.selectedGenres.filter(k => k !== key); 
@@ -86,7 +79,7 @@ export function toggleGenre(key, btn) {
     } 
     updateBackgroundFromSelection(); 
     updateGenreButtonStates();
-    document.getElementById('btn-next').disabled = state.selectedGenres.length === 0; 
+    updateNextButton();
 } 
 
 export function toggleTheme(theme, btn) { 
@@ -100,21 +93,22 @@ export function toggleTheme(theme, btn) {
         } 
     } 
     updateBackgroundFromSelection(); 
-    document.getElementById('btn-next').disabled = state.selectedThemes.length === 0; 
+    updateNextButton();
 } 
 
 export function handleMenuNext() { 
-    const btn = document.getElementById('btn-next'); 
-    if (menuStep === 1) { 
-        menuStep = 2; 
-        document.getElementById('step-genre').style.display = 'none'; 
-        document.getElementById('step-theme').style.display = 'flex'; 
-        btn.disabled = true;  
-        btn.textContent = "BUAT KARAKTER ->"; 
-        state.selectedThemes = []; 
-        document.querySelectorAll('#theme-list .toggle-btn').forEach(b => b.classList.remove('active')); 
-    } else if (menuStep === 2) { 
-        document.getElementById('screen-menu').style.display = 'none'; 
-        document.getElementById('screen-char').style.display = 'flex'; 
-    } 
+    // This will now trigger the AI Form Generation
+    // For now, we just switch screens to simulate progress,
+    // but the actual API call will be implemented in the next step.
+
+    // Placeholder behavior:
+    // document.getElementById('screen-menu').style.display = 'none';
+    // document.getElementById('screen-char').style.display = 'flex';
+
+    // We will call a function that is exposed from character.js or similar
+    if (window.initCharacterCreation) {
+        window.initCharacterCreation();
+    } else {
+        console.error("initCharacterCreation not found");
+    }
 }

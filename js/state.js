@@ -3,8 +3,8 @@ export let state = {
     history: [],  
     selectedGenres: [],  
     selectedThemes: [],  
-    language: "Indonesia", 
-    char: { name: "", hp: 100, maxHp: 100, stats: {STR:3, INT:3, DEX:3, CHA:3} }, 
+    language: "id", // 'id' or 'en'
+    char: { name: "", hp: 100, maxHp: 100, stats: {} },
     inventory: [],  
     summary: "", isGameOver: false 
 }; 
@@ -14,12 +14,14 @@ export function setState(newState) {
 }
 
 export function resetState() {
+    // Preserve language
+    const currentLang = state.language;
     state = { 
         history: [],  
         selectedGenres: [],  
         selectedThemes: [],  
-        language: "Indonesia", 
-        char: { name: "", hp: 100, maxHp: 100, stats: {STR:3, INT:3, DEX:3, CHA:3} }, 
+        language: currentLang,
+        char: { name: "", hp: 100, maxHp: 100, stats: {} },
         inventory: [],  
         summary: "", isGameOver: false 
     };

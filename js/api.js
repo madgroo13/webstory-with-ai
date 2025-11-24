@@ -3,7 +3,8 @@ import { model } from './config.js';
 import { printLog, updateStatusUI, setAtmosphere } from './modules/ui.js';
 import { renderInventory, updateCraftUI } from './modules/inventory.js';
 import { setMode } from './screens/game.js';
-import { constructSystemPrompt } from './modules/prompts.js';
+import { constructSystemPrompt, constructCharFormPrompt } from './modules/prompts.js';
+import { TRANSLATIONS, getEffectiveLanguage } from './modules/localization.js';
 
 export async function processTurn(userInput, isHidden = false) { 
     const storedKey = localStorage.getItem('gemini_api_key');
@@ -20,6 +21,15 @@ export async function processTurn(userInput, isHidden = false) {
      
     const btns = document.querySelectorAll('button'); btns.forEach(b => b.disabled = true); 
 
+    // Loading Indicator
+    let loadingEl = null;
+    const lang = getEffectiveLanguage(state.language);
+    const thinkingText = TRANSLATIONS[lang]['txt-thinking'];
+
+    if (!isHidden) {
+        loadingEl = printLog(thinkingText, 'system-msg');
+    }
+
     try { 
         const sys = constructSystemPrompt(state);
 
@@ -31,6 +41,9 @@ export async function processTurn(userInput, isHidden = false) {
         const data = await response.json(); 
         const jsonText = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim(); 
         const res = JSON.parse(jsonText); 
+
+        // Remove loading
+        if (loadingEl) loadingEl.remove();
 
         state.summary = res.summary; 
         state.history.push({ role: "model", parts: [{ text: jsonText }] }); 
@@ -44,6 +57,13 @@ export async function processTurn(userInput, isHidden = false) {
                 printLog(`Damage: ${res.hp_change}`, 'system-msg damage-text'); 
             } 
         } 
+
+        // Handle Dynamic Stats
+        if (res.stats_set) {
+            Object.keys(res.stats_set).forEach(key => {
+                state.char.stats[key] = res.stats_set[key];
+            });
+        }
 
         if(res.inventory_add) res.inventory_add.forEach(i => state.inventory.push(i)); 
         if(res.inventory_remove) { 
@@ -67,6 +87,7 @@ export async function processTurn(userInput, isHidden = false) {
 
     } catch (e) { 
         console.error(e); 
+        if (loadingEl) loadingEl.remove();
         printLog("Gangguan koneksi...", 'system-msg'); 
         state.history.pop(); 
     } finally { 
@@ -74,3 +95,28 @@ export async function processTurn(userInput, isHidden = false) {
         updateCraftUI();  
     } 
 } 
+
+export async function generateCharacterForm() {
+    const storedKey = localStorage.getItem('gemini_api_key');
+    if (!storedKey) {
+        alert("API Key required!");
+        window.openSettings();
+        return null;
+    }
+
+    const prompt = constructCharFormPrompt(state.selectedGenres, state.selectedThemes, state.language);
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${storedKey}`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+        });
+
+        const data = await response.json();
+        const jsonText = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(jsonText);
+    } catch (e) {
+        console.error("Form generation failed:", e);
+        return null;
+    }
+}

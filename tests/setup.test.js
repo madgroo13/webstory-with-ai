@@ -5,14 +5,14 @@ import { state, resetState } from '../js/state.js';
 document.body.innerHTML = `
     <div id="genre-list"></div>
     <div id="theme-list"></div>
-    <div id="stats-inputs"></div>
-    <div id="step-genre"></div>
-    <div id="step-theme"></div>
     <div id="screen-menu"></div>
     <div id="screen-char"></div>
     <button id="btn-next"></button>
     <div id="dynamic-bg"></div>
 `;
+
+// Mock global functions called by handleMenuNext
+window.initCharacterCreation = jest.fn();
 
 describe('Setup Screen', () => {
     beforeEach(() => {
@@ -20,10 +20,9 @@ describe('Setup Screen', () => {
         resetSetupState();
         document.getElementById('genre-list').innerHTML = '';
         document.getElementById('theme-list').innerHTML = '';
-        document.getElementById('step-genre').style.display = 'block';
-        document.getElementById('step-theme').style.display = 'none';
         document.getElementById('screen-menu').style.display = 'block';
         document.getElementById('screen-char').style.display = 'none';
+        window.initCharacterCreation.mockClear();
     });
 
     test('toggleGenre limits selection to 3', () => {
@@ -31,6 +30,15 @@ describe('Setup Screen', () => {
         const btn2 = document.createElement('div');
         const btn3 = document.createElement('div');
         const btn4 = document.createElement('div');
+        btn1.dataset.key = 'G1';
+        btn2.dataset.key = 'G2';
+        btn3.dataset.key = 'G3';
+        btn4.dataset.key = 'G4';
+
+        // Note: In real code, we use GENRE_DEFINITIONS to check conflicts,
+        // but here we are testing the basic toggle logic which pushes to state array.
+        // We might need to mock updateBackgroundFromSelection or GENRE_DEFINITIONS if the function relies on them heavily.
+        // The real toggleGenre calls updateBackgroundFromSelection.
 
         toggleGenre('G1', btn1);
         toggleGenre('G2', btn2);
@@ -64,15 +72,13 @@ describe('Setup Screen', () => {
         expect(state.selectedThemes).not.toContain('T4');
     });
 
-    test('handleMenuNext transitions from Genre to Theme to Character', () => {
-        // Step 1: Genre -> Theme
-        handleMenuNext();
-        expect(document.getElementById('step-genre').style.display).toBe('none');
-        expect(document.getElementById('step-theme').style.display).toBe('flex');
+    test('handleMenuNext triggers initCharacterCreation', () => {
+        // Setup state to allow next (though implementation of handleMenuNext currently bypasses check or we mocked it)
+        state.selectedGenres = ['G1'];
+        state.selectedThemes = ['T1'];
 
-        // Step 2: Theme -> Character
         handleMenuNext();
-        expect(document.getElementById('screen-menu').style.display).toBe('none');
-        expect(document.getElementById('screen-char').style.display).toBe('flex');
+
+        expect(window.initCharacterCreation).toHaveBeenCalled();
     });
 });

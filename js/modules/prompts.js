@@ -25,6 +25,7 @@ OUTPUT JSON ONLY:
     "story": "HTML string (use <p>, <b>, <i>, etc. for formatting)",
     "hp_change": int (negative for damage, positive for healing),
     "hp_set": int (optional, to set absolute HP),
+    "stats_set": {"StatName": value, "AnotherStat": "string value"} (Use this to initialize or update dynamic stats),
     "inventory_add": ["item name"],
     "inventory_remove": ["item name"],
     "atmosphere": "neutral/forest/cyberpunk/horror/combat/dungeon",
@@ -74,5 +75,33 @@ SPECIAL INSTRUCTIONS:
 ${specificInstructions.join('\n')}
 
 ${JSON_STRUCTURE}
+    `.trim();
+}
+
+export function constructCharFormPrompt(genres, themes, language) {
+    return `
+You are a Character Creation System for an RPG.
+Genres: ${genres.join(', ')}
+Themes: ${themes.join(', ')}
+Language: ${language}
+
+Task: Create a JSON definition for a character creation form suitable for this setting.
+Do NOT include "Name" or "Language" (already handled).
+Create 2-5 interesting fields that help define the character's stats and background.
+
+Output JSON ONLY:
+{
+    "intro_text": "A brief welcoming text describing the setting to the player.",
+    "fields": [
+        {
+            "key": "unique_id",
+            "label": "Display Label",
+            "type": "text" OR "select" OR "number" OR "textarea",
+            "options": ["Option A", "Option B"] (Only if type is select),
+            "default": "default value",
+            "desc": "Short helper text explaining what this affects"
+        }
+    ]
+}
     `.trim();
 }
