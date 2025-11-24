@@ -24,16 +24,15 @@ window.initCharacterCreation = initCharacterCreation;
 window.backToSetup = backToSetup;
 
 // Language Selection
-window.selectLanguage = function(lang) {
+window.submitLanguageSelection = function() {
+    const input = document.getElementById('input-language');
+    const lang = input.value.trim() || 'Indonesia';
     state.language = lang;
+
     applyTranslations();
     document.getElementById('screen-language').style.display = 'none';
     document.getElementById('screen-menu').style.display = 'flex';
-    initSetup(); // Re-init to update text if needed, or just let applyTranslations handle it?
-                 // Setup items come from config which is hardcoded in English/Indo?
-                 // Wait, config.js has GENRE_DEFINITIONS.
-                 // Ideally GENRE_DEFINITIONS should also be localized but for now user didn't ask for deep content localization.
-                 // However, "Summary of improvements" was requested in Indonesian.
+    initSetup();
 };
 
 // --- API KEY SETTINGS ---

@@ -2,8 +2,15 @@ import { state } from '../state.js';
 import { TRANSLATIONS } from './localization.js';
 
 export function applyTranslations() {
-    const lang = state.language || 'id';
-    const text = TRANSLATIONS[lang];
+    // Default to 'id' unless language looks like English
+    let uiLang = 'id';
+    const userLang = (state.language || '').toLowerCase();
+
+    if (userLang.includes('english') || userLang.includes('en') || userLang === 'us' || userLang === 'uk') {
+        uiLang = 'en';
+    }
+
+    const text = TRANSLATIONS[uiLang];
     if (!text) return;
 
     document.querySelectorAll('[data-i18n]').forEach(el => {

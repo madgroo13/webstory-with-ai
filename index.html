@@ -115,9 +115,11 @@
     <!-- Screen: Language Selection -->
     <div id="screen-language" class="screen-overlay" style="display:flex;">
         <h2 class="screen-title">SELECT LANGUAGE</h2>
-        <div style="display:flex; gap:20px;">
-            <button class="big-btn" onclick="selectLanguage('id')">🇮🇩 Bahasa Indonesia</button>
-            <button class="big-btn" onclick="selectLanguage('en')">🇬🇧 English</button>
+        <p style="color:#aaa; margin-bottom:20px;">Ketik bahasa yang Anda inginkan untuk cerita.</p>
+        <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+            <input type="text" id="input-language" placeholder="Indonesia, English, Jawa, Sunda..."
+                   style="padding:10px 20px; border-radius:30px; border:none; width:250px; text-align:center;">
+            <button class="big-btn" onclick="submitLanguageSelection()">LANJUT / NEXT</button>
         </div>
     </div>
 
