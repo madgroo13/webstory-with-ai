@@ -1,0 +1,132 @@
+<!DOCTYPE html> 
+<html lang="id"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>AI RPG: Complete Edition</title> 
+    <link rel="stylesheet" href="css/style.css">
+</head> 
+<body> 
+ 
+<!-- BG --> 
+<div id="dynamic-bg" class="bg-neutral"></div> 
+ 
+<div id="game-container"> 
+    <!-- Header --> 
+    <div id="header"> 
+        <h1>AI RPG <span class="tag">COMPLETE</span></h1> 
+        <div class="ctrl-group"> 
+            <button class="btn-small active" id="btn-toggle-inv" onclick="toggleInventoryView()"> 
+                <span>🎒</span> Tas 
+            </button> 
+            <button class="btn-small" onclick="exportSave()">💾 Save</button> 
+            <button class="btn-small" onclick="document.getElementById('file-upload').click()">📂 Load</button> 
+            <button class="btn-small" style="color:#ff8888" onclick="confirmReset()">❌ Reset</button> 
+            <input type="file" id="file-upload" style="display:none" onchange="importSave(this)"> 
+        </div> 
+    </div> 
+ 
+    <!-- Status --> 
+    <div id="status-bar" style="display:none"> 
+        <div class="hp-container"> 
+            <span style="color:var(--danger); font-weight:bold;">HP</span> 
+            <div class="hp-bar-bg"><div id="hp-bar" class="hp-bar-fill"></div></div> 
+            <span id="hp-text" style="font-size:0.8rem;">100/100</span> 
+        </div> 
+        <div class="stats-display"> 
+            <div class="stat-item">STR<span id="disp-str">0</span></div> 
+            <div class="stat-item">INT<span id="disp-int">0</span></div> 
+            <div class="stat-item">DEX<span id="disp-dex">0</span></div> 
+            <div class="stat-item">CHA<span id="disp-cha">0</span></div> 
+        </div> 
+    </div> 
+ 
+    <!-- Output (Maximized) --> 
+    <div id="output"></div> 
+ 
+    <!-- INVENTORY AREA (Collapsible) --> 
+    <div id="inventory-area" class="inv-collapsed" style="display:none;"> 
+        <div class="inv-header"> 
+            <span>Tas Penyimpanan</span> 
+            <button class="btn-small" onclick="toggleCraftingMode()">Mode Crafting: <span id="craft-status" style="color:#666">OFF</span></button> 
+        </div> 
+         
+        <div class="inv-grid" id="inv-grid"> 
+            <div class="inv-item" style="opacity:0.5; pointer-events:none;">Kosong</div> 
+        </div> 
+ 
+        <!-- Crafting UI --> 
+        <div id="crafting-controls"> 
+            <div class="craft-slot" id="craft-slot-1">Pilih Item 1</div> 
+            <span style="color:white; font-weight:bold; font-size:1.2rem;">+</span> 
+            <div class="craft-slot" id="craft-slot-2">Pilih Item 2</div> 
+            <button id="btn-craft" class="craft-btn" disabled onclick="executeCraft()">GABUNGKAN</button> 
+        </div> 
+         
+        <div style="text-align: center; margin-top: 10px;"> 
+            <small style="color:#666; cursor:pointer;" onclick="toggleInventoryView()">▲ Tutup Tas ▲</small> 
+        </div> 
+    </div> 
+ 
+    <!-- Item Popup --> 
+    <div id="item-actions"> 
+        <button class="action-btn" onclick="handleItemAction('Gunakan')">Gunakan</button> 
+        <button class="action-btn" onclick="handleItemAction('Lihat')">Lihat</button> 
+        <button class="action-btn" onclick="handleItemAction('Buang')">Buang</button> 
+        <button class="action-btn" style="background:#444" onclick="closePopup()">Batal</button> 
+    </div> 
+ 
+    <!-- Input Area --> 
+    <div id="input-area" style="display:none"> 
+        <div id="input-row"> 
+            <input type="text" id="user-input" placeholder="Tulis aksi..." autocomplete="off"> 
+            <button class="btn-action" onclick="submitAction()">Go</button> 
+        </div> 
+        <div id="choice-container"></div> 
+        <div id="dice-container"> 
+            <div style="font-size:0.9rem; color:var(--text-muted)">SKILL CHECK: <span id="check-reason" style="color:var(--warning)">???</span></div> 
+            <div class="dice-box" id="dice-box" onclick="rollDice()">D20</div> 
+            <div style="font-size:0.8rem; color:#aaa">Ketuk dadu</div> 
+        </div> 
+    </div> 
+ 
+    <!-- Screen: Setup Genre --> 
+    <div id="screen-menu" class="screen-overlay"> 
+        <h2 class="screen-title">SETUP DUNIA</h2> 
+         
+        <!-- Step 1: Gameplay Style --> 
+        <div id="step-genre" style="width:100%; display:flex; flex-direction:column; align-items:center;"> 
+            <div class="section-header">1. PILIH GAYA BERMAIN (MAX 3)</div> 
+            <div class="mechanics-grid" id="genre-list"></div> 
+        </div> 
+ 
+        <!-- Step 2: World Theme (Hidden initially) --> 
+        <div id="step-theme" style="display:none; width:100%; flex-direction:column; align-items:center;"> 
+            <div class="section-header">2. PILIH TEMA DUNIA (MAX 3)</div> 
+            <div class="theme-grid" id="theme-list"></div> 
+        </div> 
+ 
+        <button id="btn-next" class="big-btn" disabled onclick="handleMenuNext()">PILIH TEMA -></button> 
+    </div> 
+ 
+    <div id="screen-char" class="screen-overlay" style="display:none"> 
+        <h2 class="screen-title">KARAKTER</h2> 
+        <div style="color:var(--warning); margin-bottom:10px;">Poin: <span id="points-val">10</span></div> 
+        <div id="stats-inputs" style="width:100%; max-width:500px;"></div> 
+         
+        <div class="input-group" style="margin-top:20px;"> 
+            <label>Nama Karakter</label> 
+            <input type="text" id="char-name" value="Hero" placeholder="Masukkan nama..."> 
+        </div> 
+        <div class="input-group"> 
+            <label>Bahasa Cerita</label> 
+            <input type="text" id="char-lang" value="Indonesia" placeholder="Indonesia / English"> 
+        </div> 
+ 
+        <button class="big-btn" onclick="startGame()">Mulai Petualangan</button> 
+    </div> 
+</div> 
+ 
+<script type="module" src="js/main.js"></script> 
+</body> 
+</html>
