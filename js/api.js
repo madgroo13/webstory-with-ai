@@ -1,10 +1,17 @@
 import { state, setState } from './state.js';
-import { model, apiKey } from './config.js';
+import { model } from './config.js';
 import { printLog, updateStatusUI, setAtmosphere } from './modules/ui.js';
 import { renderInventory, updateCraftUI } from './modules/inventory.js';
 import { setMode } from './screens/game.js';
 
 export async function processTurn(userInput, isHidden = false) { 
+    const storedKey = localStorage.getItem('gemini_api_key');
+    if (!storedKey) {
+        alert("Silakan masukkan API Key Google Gemini Anda di menu Settings (⚙️).");
+        window.openSettings();
+        return;
+    }
+
     if (!isHidden) printLog(userInput, 'user-msg'); 
     document.getElementById('user-input').value = ''; 
     const context = `[HP:${state.char.hp}/${state.char.maxHp}][INV:${state.inventory.join(',')}] ` + userInput; 
@@ -32,7 +39,7 @@ export async function processTurn(userInput, isHidden = false) {
             "gameOver": boolean 
         }`; 
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, { 
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${storedKey}`, {
             method: 'POST', headers: {'Content-Type': 'application/json'}, 
             body: JSON.stringify({ contents: state.history, systemInstruction: { parts: [{ text: sys }] } }) 
         }); 

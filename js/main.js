@@ -22,6 +22,29 @@ window.handleMenuNext = handleMenuNext;
 window.modStat = modStat;
 window.startGame = startGame;
 
+// --- API KEY SETTINGS ---
+window.openSettings = function() {
+    const key = localStorage.getItem('gemini_api_key') || '';
+    document.getElementById('input-api-key').value = key;
+    document.getElementById('modal-settings').style.display = 'flex';
+};
+
+window.closeSettings = function() {
+    document.getElementById('modal-settings').style.display = 'none';
+};
+
+window.saveApiKey = function() {
+    const input = document.getElementById('input-api-key');
+    const key = input.value.trim();
+    if(key) {
+        localStorage.setItem('gemini_api_key', key);
+        alert("API Key disimpan!");
+        closeSettings();
+    } else {
+        alert("API Key tidak boleh kosong.");
+    }
+};
+
 function exportSave() { 
     const blob = new Blob([JSON.stringify(state)], {type:'application/json'}); 
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `rpg_save_${Date.now()}.json`; a.click(); 
