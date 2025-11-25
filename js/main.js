@@ -23,6 +23,10 @@ window.startGame = startGame;
 window.initCharacterCreation = initCharacterCreation;
 window.backToSetup = backToSetup;
 
+window.toggleSidebar = function() {
+    document.body.classList.toggle('sidebar-open');
+};
+
 // Language Selection
 window.submitLanguageSelection = function() {
     const input = document.getElementById('input-language');
@@ -85,3 +89,8 @@ function confirmReset() { if(confirm("Reset?")) location.reload(); }
 // Init
 document.getElementById('user-input').addEventListener('keypress', (e) => { if(e.key==='Enter') submitAction(); }); 
 // Removed automatic initSetup(), it will happen after language selection
+
+// Initial check for API Key
+if (!localStorage.getItem('gemini_api_key')) {
+    setTimeout(window.openSettings, 500); // Delay to allow UI to load
+}

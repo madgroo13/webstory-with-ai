@@ -6,13 +6,20 @@
     <title>AI RPG: Complete Edition</title> 
     <link rel="stylesheet" href="css/style.css?v=1">
 </head> 
-<body> 
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+    <h1 class="sidebar-title">AI RPG <span class="tag">v0.1</span></h1>
+    <div class="sidebar-menu">
+        <button class="sidebar-btn" onclick="openSettings()" data-i18n="btn-settings">🔑 Atur API Key</button>
+        <!-- Future menu items go here -->
+    </div>
+</div>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
  
 <!-- BG --> 
 <div id="dynamic-bg" class="bg-neutral"></div> 
-
-<!-- SETTINGS FLOATING BUTTON -->
-<button id="btn-settings" onclick="openSettings()" data-i18n="btn-settings">⚙️ API Key</button>
 
 <!-- SETTINGS MODAL -->
 <div id="modal-settings" class="modal-overlay" style="display:none;">
@@ -38,8 +45,8 @@
 <div id="game-container"> 
     <!-- Header --> 
     <div id="header"> 
-        <h1>AI RPG <span class="tag">v0.1</span></h1> 
-        <div id="current-setup" style="font-size:0.8rem; opacity:0.7; margin-top:5px; font-weight:normal;"></div>
+        <button id="btn-hamburger" onclick="toggleSidebar()">☰</button>
+        <div id="current-setup" style="font-size:0.8rem; opacity:0.7; margin-top:5px; font-weight:normal; flex-grow:1; text-align:center;"></div>
         <div class="ctrl-group"> 
             <button class="btn-small active" id="btn-toggle-inv" onclick="toggleInventoryView()" data-i18n="btn-inv">
                 <span>🎒</span> Tas 
