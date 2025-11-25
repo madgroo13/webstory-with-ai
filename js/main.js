@@ -31,6 +31,10 @@ window.submitLanguageSelection = function() {
 
     applyTranslations();
     document.getElementById('screen-language').style.display = 'none';
+
+    // Check for API key *after* language selection, before showing the next screen
+    checkApiKeyOnLoad();
+
     document.getElementById('screen-menu').style.display = 'flex';
     initSetup();
 };
@@ -44,6 +48,11 @@ window.openSettings = function() {
 
 window.closeSettings = function() {
     document.getElementById('modal-settings').style.display = 'none';
+    // Check if key is still missing and show notification
+    const key = localStorage.getItem('gemini_api_key') || '';
+    if (!key) {
+        document.getElementById('btn-settings').classList.add('notify');
+    }
 };
 
 window.saveApiKey = function() {
@@ -52,11 +61,20 @@ window.saveApiKey = function() {
     if(key) {
         localStorage.setItem('gemini_api_key', key);
         alert("API Key Saved!");
+        document.getElementById('btn-settings').classList.remove('notify');
         closeSettings();
     } else {
         alert("API Key cannot be empty.");
     }
 };
+
+function checkApiKeyOnLoad() {
+    const key = localStorage.getItem('gemini_api_key') || '';
+    if (!key) {
+        // Initially open settings if no key is found
+        openSettings();
+    }
+}
 
 function exportSave() { 
     const blob = new Blob([JSON.stringify(state)], {type:'application/json'}); 
@@ -85,3 +103,19 @@ function confirmReset() { if(confirm("Reset?")) location.reload(); }
 // Init
 document.getElementById('user-input').addEventListener('keypress', (e) => { if(e.key==='Enter') submitAction(); }); 
 // Removed automatic initSetup(), it will happen after language selection
+
+// --- SIDEBAR LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    function toggleSidebar() {
+        hamburgerIcon.classList.toggle('active');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    hamburgerIcon.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+});
