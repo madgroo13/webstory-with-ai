@@ -375,6 +375,7 @@ input[type="text"]:focus { background: transparent; }
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 #hamburger-icon span {
     display: block;
@@ -384,6 +385,9 @@ input[type="text"]:focus { background: transparent; }
     border-radius: 2px;
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
     transform-origin: center;
+}
+#hamburger-icon.active {
+    transform: translateX(230px);
 }
 #hamburger-icon.active span:nth-child(1) {
     transform: translateY(9.5px) rotate(45deg);
