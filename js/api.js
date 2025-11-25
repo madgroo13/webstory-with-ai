@@ -1,5 +1,4 @@
 import { state, setState } from './state.js';
-import { model } from './config.js';
 import { printLog, updateStatusUI, setAtmosphere } from './modules/ui.js';
 import { renderInventory, updateCraftUI } from './modules/inventory.js';
 import { setMode } from './screens/game.js';
@@ -32,8 +31,9 @@ export async function processTurn(userInput, isHidden = false) {
 
     try { 
         const sys = constructSystemPrompt(state);
+        const selectedModel = localStorage.getItem('gemini_model') || 'gemini-1.5-flash';
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${storedKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${storedKey}`, {
             method: 'POST', headers: {'Content-Type': 'application/json'}, 
             body: JSON.stringify({ contents: state.history, systemInstruction: { parts: [{ text: sys }] } }) 
         }); 
@@ -105,9 +105,10 @@ export async function generateCharacterForm() {
     }
 
     const prompt = constructCharFormPrompt(state.selectedGenres, state.selectedThemes, state.language);
+    const selectedModel = localStorage.getItem('gemini_model') || 'gemini-1.5-flash';
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${storedKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${storedKey}`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
         });
@@ -118,5 +119,30 @@ export async function generateCharacterForm() {
     } catch (e) {
         console.error("Form generation failed:", e);
         return null;
+    }
+}
+
+export async function fetchAvailableModels(apiKey) {
+    if (!apiKey) return [];
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        if (!response.ok) {
+            console.error("Failed to fetch models:", response.statusText);
+            return [];
+        }
+        const data = await response.json();
+
+        // Filter models that can be used for chat/text generation
+        const compatibleModels = data.models.filter(model =>
+            model.supportedGenerationMethods.includes("generateContent")
+        );
+
+        // Return just the names of the models
+        return compatibleModels.map(model => model.name);
+
+    } catch (e) {
+        console.error("Error fetching available models:", e);
+        return [];
     }
 }
