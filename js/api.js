@@ -1,5 +1,4 @@
 import { state, setState } from './state.js';
-import { model } from './config.js';
 import { printLog, updateStatusUI, setAtmosphere } from './modules/ui.js';
 import { renderInventory, updateCraftUI } from './modules/inventory.js';
 import { setMode } from './screens/game.js';
@@ -32,8 +31,9 @@ export async function processTurn(userInput, isHidden = false) {
 
     try { 
         const sys = constructSystemPrompt(state);
+        const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${storedKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${storedKey}`, {
             method: 'POST', headers: {'Content-Type': 'application/json'}, 
             body: JSON.stringify({ contents: state.history, systemInstruction: { parts: [{ text: sys }] } }) 
         }); 
@@ -105,9 +105,10 @@ export async function generateCharacterForm() {
     }
 
     const prompt = constructCharFormPrompt(state.selectedGenres, state.selectedThemes, state.language);
+    const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${storedKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${storedKey}`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
         });
@@ -118,5 +119,51 @@ export async function generateCharacterForm() {
     } catch (e) {
         console.error("Form generation failed:", e);
         return null;
+    }
+}
+
+export async function checkApiKeyValidity(apiKey) {
+    if (!apiKey) {
+        return { success: false, message: "API Key tidak boleh kosong." };
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (response.ok) {
+            if (data.models && data.models.length > 0) {
+                // Filter models that can be used for chat/text generation
+                const compatibleModels = data.models
+                    .filter(model => model.supportedGenerationMethods.includes("generateContent"))
+                    .map(model => model.name); // Return just the names
+
+                if (compatibleModels.length > 0) {
+                    return { success: true, models: compatibleModels };
+                } else {
+                    return { success: false, message: "Kunci valid, tetapi tidak ada model yang kompatibel ditemukan." };
+                }
+            } else {
+                return { success: false, message: "Kunci valid, tetapi tidak ada model yang tersedia." };
+            }
+        }
+
+        if (data.error) {
+            if (data.error.code === 400) {
+                 return { success: false, message: "API Key tidak valid atau salah format." };
+            }
+            if (data.error.code === 429) {
+                return { success: false, message: "Kuota API habis atau batas permintaan tercapai." };
+            }
+            return { success: false, message: `Error: ${data.error.message}` };
+        }
+
+        return { success: false, message: `Gagal memvalidasi. Status: ${response.status}` };
+
+    } catch (e) {
+        console.error("API Key check failed:", e);
+        return { success: false, message: "Gagal terhubung ke server Google. Periksa koneksi internet Anda." };
     }
 }
