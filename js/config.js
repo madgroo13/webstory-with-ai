@@ -1,6 +1,5 @@
 // CONFIG 
 export const apiKey = "";  
-export const model = "gemini-2.5-flash-preview-09-2025"; 
  
 // 1. GAMEPLAY STYLES 
 export const GENRE_DEFINITIONS = { 
