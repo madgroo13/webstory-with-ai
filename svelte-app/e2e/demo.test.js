@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('home page has expected h1', async ({ page }) => {
+test('setup screen has expected h2', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.locator('h1')).toBeVisible();
+	await expect(page.locator('h2', { hasText: 'SETUP DUNIA' })).toBeVisible();
 });
