@@ -1,5 +1,7 @@
 import { get } from 'svelte/store';
 import { gameState } from '$lib/store.js';
+import { model } from '$lib/config.js';
+import { PUBLIC_GEMINI_API_KEY } from '$env/static/public';
 
 export async function processTurn(userInput, isHidden = false) {
     const state = get(gameState);
@@ -10,36 +12,53 @@ export async function processTurn(userInput, isHidden = false) {
 
     gameState.update(s => ({ ...s, isLoading: true }));
 
+    // --- LOGIC MOVED FROM +server.js ---
+    const context = `[HP:${state.char.hp}/${state.char.maxHp}][INV:${state.inventory.join(',')}] ${userInput}`;
+    const historyForAPI = [...state.history.map(h => ({ role: h.role, parts: [{ text: h.text }] })), { role: "user", parts: [{ text: context }] }];
+
+    const sys = `
+        RPG GM. Language: '${state.language}'.
+        Mechanics: ${state.selectedGenres.join(', ')}.
+        Setting: ${state.selectedThemes.join(', ')}.
+        OUTPUT JSON ONLY:
+        {
+            "story": "HTML string", "hp_change": int, "hp_set": int, "inventory_add": ["item"],
+            "inventory_remove": ["item"], "atmosphere": "string", "summary": "recap",
+            "mode": "text/choice/dice", "options": ["opt1"],
+            "check": {"stat":"STR","dc":10,"reason":""}, "gameOver": boolean
+        }`;
+    // --- END OF MOVED LOGIC ---
+
     try {
-        const response = await fetch('/api/game', {
+        // --- DIRECT API CALL ---
+        const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${PUBLIC_GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                history: state.history,
-                language: state.language,
-                selectedGenres: state.selectedGenres,
-                selectedThemes: state.selectedThemes,
-                char: state.char,
-                inventory: state.inventory,
-                userInput: userInput
+                contents: historyForAPI,
+                systemInstruction: { parts: [{ text: sys }] }
             })
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'API request failed');
+        if (!apiResponse.ok) {
+            const errorText = await apiResponse.text();
+            console.error("API Error Response:", errorText);
+            throw new Error(`API request failed: ${errorText}`);
         }
 
-        const res = await response.json();
+        const data = await apiResponse.json();
+        const jsonText = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const res = JSON.parse(jsonText);
+        // --- END OF DIRECT API CALL ---
 
-        // Update the store with the response from our local API endpoint
+
+        // Update the store with the response from the Gemini API
         gameState.update(s => {
             let newHp = s.char.hp;
             if (res.hp_set) {
                 newHp = res.hp_set;
             }
             if (res.hp_change) {
-                // Correct HP calculation: clamp between 0 and maxHp
                 newHp = Math.max(0, Math.min(s.char.maxHp, newHp + res.hp_change));
             }
 
