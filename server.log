@@ -1,0 +1,12 @@
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /css/style.css?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/main.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/screens/setup.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/modules/inventory.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/modules/ui.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/screens/game.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/screens/character.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/config.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2025 17:45:10] "GET /js/modules/utils.js HTTP/1.1" 200 -

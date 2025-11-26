@@ -58,7 +58,7 @@ function importSave(inp) {
         document.getElementById('screen-char').style.display = 'none'; 
         document.getElementById('status-bar').style.display = 'flex'; 
         if(state.inventory && state.inventory.length > 0) renderInventory(); 
-        document.getElementById('interaction-area').style.display = 'flex'; 
+        document.getElementById('input-area').style.display = 'flex';
         updateStatusUI();  
         printLog("<i>Loaded.</i>", "system-msg");  
     }; 
